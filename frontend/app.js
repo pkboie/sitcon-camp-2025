@@ -18,10 +18,28 @@ window.onload = () => {
 };
 
 const cityCenters = {
-  Taipei: [121.5654, 25.0330],
-  Taichung: [120.6736, 24.1477],
-  Kaohsiung: [120.3014, 22.6273]
+  Taipei: [121.5654, 25.0330],      // 台北市
+  NewTaipei: [121.4628, 25.0129],   // 新北市
+  Taoyuan: [121.3010, 24.9947],     // 桃園市
+  Hsinchu: [120.9647, 24.8039],     // 新竹市
+  Miaoli: [120.8184, 24.5602],      // 苗栗縣
+  Taichung: [120.6736, 24.1477],    // 台中市
+  Changhua: [120.4818, 24.0667],    // 彰化縣
+  Nantou: [120.9876, 23.8388],      // 南投縣
+  Yunlin: [120.4313, 23.7559],      // 雲林縣
+  Chiayi: [120.4473, 23.4754],      // 嘉義市
+  Tainan: [120.2130, 22.9908],      // 台南市
+  Kaohsiung: [120.3014, 22.6273],   // 高雄市
+  Pingtung: [120.4880, 22.5519],    // 屏東縣
+  Yilan: [121.7540, 24.7021],       // 宜蘭縣
+  Hualien: [121.6044, 23.9911],     // 花蓮縣
+  Taitung: [121.1132, 22.7564],     // 台東縣
+  Penghu: [119.6151, 23.5655],      // 澎湖縣
+  Keelung: [121.7081, 25.1089],     // 基隆市
+  Kinmen: [118.3171, 24.4321],      // 金門縣
+  Matsu: [119.9394, 26.1608]        // 連江縣 (馬祖)
 };
+
 
 document.getElementById('citySelect').addEventListener('change', function () {
   const city = this.value;
@@ -187,7 +205,6 @@ function addToHandbook(spot) {
     });
 }
 
-
 // 呼叫後端儲存 API
 function saveSpotToBackend(spot, noteText) {
   fetch('http://127.0.0.1:8000/spots/', {
@@ -208,9 +225,19 @@ function saveSpotToBackend(spot, noteText) {
   });
 }
 
+// 城市選擇移動地圖
+document.getElementById('citySelect').addEventListener('change', function () {
+  const city = this.value;
+  const center = cityCenters[city];
+  if (center) {
+    map.flyTo({ center, zoom: 10 });
+  }
+});
+
 document.getElementById('generate-pdf').addEventListener('click', async () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
+
   const handbook = document.getElementById('handbook');
   const entries = handbook.querySelectorAll('.card');
 
@@ -219,8 +246,23 @@ document.getElementById('generate-pdf').addEventListener('click', async () => {
     return;
   }
 
-  let y = 20; // 初始 Y 座標
+  // ======= 封面頁 =======
+  pdf.setFontSize(24);
+  pdf.setTextColor(40, 40, 90);
+  pdf.text("我的旅遊小冊", 105, 80, { align: 'center' });
 
+  pdf.setFontSize(14);
+  pdf.setTextColor(80);
+  pdf.text("探索旅程・書寫回憶", 105, 95, { align: 'center' });
+
+  const today = new Date().toLocaleDateString();
+  pdf.setFontSize(10);
+  pdf.setTextColor(100);
+  pdf.text(`製作日期：${today}`, 105, 110, { align: 'center' });
+
+  pdf.addPage(); // 換頁
+
+  // ======= 每景點一頁 =======
   for (const entry of entries) {
     const title = entry.querySelector('h4')?.textContent || '';
     const imgEl = entry.querySelector('img');
@@ -228,50 +270,41 @@ document.getElementById('generate-pdf').addEventListener('click', async () => {
     const note = entry.querySelector('textarea')?.value || '';
 
     // 標題
-    pdf.setFontSize(14);
-    pdf.text(title, 10, y);
-    y += 8;
+    pdf.setFontSize(18);
+    pdf.setTextColor(30, 30, 100);
+    pdf.text(title, 20, 30);
 
-    // 圖片（如存在）
+    // 圖片
     if (imgEl && imgEl.src) {
       try {
         const imgData = await toDataURL(imgEl.src);
-        pdf.addImage(imgData, 'JPEG', 10, y, 60, 40);
-        y += 45;
+        pdf.addImage(imgData, 'JPEG', 40, 40, 130, 80); // 置中大圖
       } catch (e) {
         pdf.setFontSize(10);
-        pdf.text('(圖片載入失敗)', 10, y);
-        y += 10;
+        pdf.text('(圖片載入失敗)', 20, 50);
       }
     }
 
-    // 官網
-    if (url) {
-      pdf.setFontSize(10);
-      pdf.text(`官網：${url}`, 10, y);
-      y += 7;
-    }
+    // 官網連結
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 102, 204);
+    pdf.textWithLink("官方網站", 20, 130, { url });
 
     // 筆記
     if (note) {
-      const lines = pdf.splitTextToSize(`筆記：${note}`, 180);
-      pdf.text(lines, 10, y);
-      y += lines.length * 6;
+      pdf.setFontSize(12);
+      pdf.setTextColor(50);
+      const noteLines = pdf.splitTextToSize(`筆記：${note}`, 170);
+      pdf.text(noteLines, 20, 145);
     }
 
-    y += 10;
-
-    if (y > 260) {
-      pdf.addPage();
-      y = 20;
-    }
+    pdf.addPage(); // 每景點一頁
   }
 
-  pdf.save('旅遊小冊.pdf');
+  pdf.save("旅遊小冊.pdf");
 });
 
-// 將圖片網址轉為 base64（給 jsPDF 使用）
-function toDataURL(url) {
+async function toDataURL(url) {
   return fetch(url)
     .then(res => res.blob())
     .then(blob => new Promise((resolve) => {
@@ -280,4 +313,3 @@ function toDataURL(url) {
       reader.readAsDataURL(blob);
     }));
 }
-
