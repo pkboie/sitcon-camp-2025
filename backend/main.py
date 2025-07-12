@@ -6,7 +6,7 @@ import sqlite3
 
 app = FastAPI()
 
-# CORS for frontend localhost:5500 (or your port)
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,13 +14,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# SQLite init
+# SQLite 初始化
 conn = sqlite3.connect('spots.db', check_same_thread=False)
 c = conn.cursor()
 c.execute('''
 CREATE TABLE IF NOT EXISTS spots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT UNIQUE,
     img TEXT,
     url TEXT,
     note TEXT
@@ -36,7 +36,7 @@ class Spot(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the SITCON Camp API!"}
+    return {"message": "Welcome to the Travel Handbook API!"}
 
 @app.get("/spots/", response_model=List[Spot])
 def get_spots():
@@ -46,7 +46,7 @@ def get_spots():
 
 @app.post("/spots/")
 def add_spot(spot: Spot):
-    c.execute("INSERT INTO spots (name, img, url, note) VALUES (?, ?, ?, ?)",
+    c.execute("INSERT OR REPLACE INTO spots (name, img, url, note) VALUES (?, ?, ?, ?)",
               (spot.name, spot.img, spot.url, spot.note))
     conn.commit()
     return {"message": "Spot added"}
