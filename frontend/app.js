@@ -30,43 +30,151 @@ const taipeiSpots = [
 ];
 
 // 新增 Marker
-taipeiSpots.forEach(s => {
+taipeiSpots.forEach((spot) => {
   const marker = new mapboxgl.Marker()
-    .setLngLat(s.coord)
-    .addTo(map);
-
-  marker.getElement().addEventListener('click', () => {
-    showSpotInfo(s);
-  });
-});
-
-// 顯示景點資訊
-function showSpotInfo(spot) {
-  const info = document.createElement('div');
-  info.innerHTML = `
-    <h3>${spot.name}</h3>
-    <img src="${spot.img}" width="100%">
-    <p><a href="${spot.url}" target="_blank">官網</a></p>
-    <button onclick='saveSpot(${JSON.stringify(JSON.stringify(spot))})'>儲存</button>
-  `;
-  new mapboxgl.Popup()
     .setLngLat(spot.coord)
-    .setDOMContent(info)
     .addTo(map);
+    marker.getElement().style.cursor = 'pointer'; // 設定游標為 pointer
+    marker.getElement().style.backgroundColor = '#fff'; // 設定背景色
+    marker.getElement().style.padding = '5px'; // 設定內邊距
+    marker.getElement().style.borderRadius = '5px'; // 設定圓角
+    marker.getElement().style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'; // 設定陰影效果
+    marker.getElement().innerHTML = `<strong>${spot.name}</strong>`;
+    // 點擊 Marker 顯示景點資訊
+
+    marker.getElement().addEventListener('click', () => {
+      showSpotInfo(spot);
+    });
+    marker.getElement().addEventListener('mouseover', () => {
+        marker.getElement().style.backgroundColor = '#e0e0e0'; // 滑鼠移入變色
+        });
+    marker.getElement().addEventListener('mouseout', () => {
+        marker.getElement().style.backgroundColor = '#fff'; // 滑鼠移出變回原色
+    });
+    
+  });
+
+// 顯示景點資訊（點 Marker 呼叫）
+function showSpotInfo(spot) {
+  const noteList = document.getElementById('note-list');
+
+  const tempNote = document.createElement('div');
+  tempNote.style.border = '1px solid #ccc';
+  tempNote.style.padding = '5px';
+  tempNote.style.marginBottom = '10px';
+  tempNote.style.backgroundColor = '#f9f9f9';
+
+  // 標題
+  const title = document.createElement('h3');
+  title.textContent = spot.name;
+  tempNote.appendChild(title);
+
+  // 圖片
+  const img = document.createElement('img');
+  img.src = spot.img;
+  img.alt = spot.name;
+  img.style.width = '100%';
+  img.style.display = 'block';
+  tempNote.appendChild(img);
+
+  // 官網連結
+  const linkP = document.createElement('p');
+  const link = document.createElement('a');
+  link.href = spot.url;
+  link.target = "_blank";
+  link.textContent = "官網";
+  linkP.appendChild(link);
+  tempNote.appendChild(linkP);
+
+  // 儲存到旅遊手冊按鈕
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = '加入旅遊手冊';
+  saveBtn.style.marginTop = '10px';
+  saveBtn.addEventListener('click', () => {
+    addToHandbook(spot);
+  });
+  tempNote.appendChild(saveBtn);
+
+  noteList.appendChild(tempNote);
 }
 
-// 儲存景點
-function saveSpot(spotStr) {
-  const spot = JSON.parse(spotStr);
+// 將景點加入旅遊手冊（正式筆記區）
+function addToHandbook(spot) {
   const noteList = document.getElementById('note-list');
 
   const note = document.createElement('div');
-  note.innerHTML = `
-    <h4>${spot.name}</h4>
-    <img src="${spot.img}" width="100%">
-    <p><a href="${spot.url}" target="_blank">官網</a></p>
-    <textarea placeholder="旅遊筆記..."></textarea>
-    <button onclick="this.parentElement.remove()">刪除</button>
-  `;
+  note.style.border = '1px solid #ccc';
+  note.style.padding = '5px';
+  note.style.marginBottom = '10px';
+  note.style.backgroundColor = '#ffffff';
+
+  // 標題
+  const title = document.createElement('h4');
+  title.textContent = spot.name;
+  note.appendChild(title);
+
+  // 圖片
+  const img = document.createElement('img');
+  img.src = spot.img;
+  img.alt = spot.name;
+  img.style.width = '100%';
+  img.style.display = 'block';
+  note.appendChild(img);
+
+  // 官網連結
+  const linkP = document.createElement('p');
+  const link = document.createElement('a');
+  link.href = spot.url;
+  link.target = "_blank";
+  link.textContent = "官網";
+  linkP.appendChild(link);
+  note.appendChild(linkP);
+
+  // 旅遊筆記 textarea
+  const textarea = document.createElement('textarea');
+  textarea.placeholder = "旅遊筆記...";
+  textarea.style.width = '100%';
+  textarea.style.marginTop = '5px';
+  note.appendChild(textarea);
+
+  // 儲存到後端按鈕
+  const backendBtn = document.createElement('button');
+  backendBtn.textContent = "儲存到資料庫";
+  backendBtn.style.marginTop = '5px';
+  backendBtn.addEventListener('click', () => {
+    saveSpotToBackend(spot, textarea.value);
+  });
+  note.appendChild(backendBtn);
+
+  // 刪除按鈕
+  const delBtn = document.createElement('button');
+  delBtn.textContent = "刪除";
+  delBtn.style.marginTop = '5px';
+  delBtn.addEventListener('click', () => {
+    note.remove();
+  });
+  note.appendChild(delBtn);
+
   noteList.appendChild(note);
+}
+
+
+// 呼叫後端儲存 API
+function saveSpotToBackend(spot, noteText) {
+  fetch('http://127.0.0.1:8000/spots/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: spot.name,
+      img: spot.img,
+      url: spot.url,
+      note: noteText
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("已儲存至後端", data);
+  });
 }
