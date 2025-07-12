@@ -11,7 +11,15 @@
 <body>
   <div id="container" class="d-flex">
     <div id="map" style="flex:1"></div>
+
     <div id="notes" class="p-3" style="width:350px; overflow-y:auto;">
+        <label for="citySelect">選擇縣市：</label>
+        <select id="citySelect" class="form-select w-auto d-inline-block">
+            <option value="Taipei">台北市</option>
+            <option value="Taichung">台中市</option>
+            <option value="Kaohsiung">高雄市</option>
+            <!-- 你可以擴充更多 -->
+        </select>
       <h4 class="mb-3">景點資訊</h4>
       <div id="temp-spot" class="mb-4"></div>
 

@@ -7,6 +7,33 @@ const map = new mapboxgl.Map({
   zoom: 10
 });
 
+window.onload = () => {
+  fetch('http://127.0.0.1:8000/spots/')
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(spot => {
+        addToHandbook(spot);
+      });
+    });
+};
+
+const cityCenters = {
+  Taipei: [121.5654, 25.0330],
+  Taichung: [120.6736, 24.1477],
+  Kaohsiung: [120.3014, 22.6273]
+};
+
+document.getElementById('citySelect').addEventListener('change', function () {
+  const city = this.value;
+  const center = cityCenters[city];
+  if (center) {
+    map.flyTo({
+      center: center,
+      zoom: 10
+    });
+  }
+});
+
 // 景點資料
 const taipeiSpots = [
   {
@@ -149,6 +176,15 @@ function addToHandbook(spot) {
   note.appendChild(delBtn);
 
   handbook.appendChild(note);
+
+    saveBtn.addEventListener('click', () => {
+    addToHandbook(spot);
+    saveSpotToBackend(spot, ""); // 儲存時預設 note 空
+    });
+
+    textarea.addEventListener('change', () => {
+    saveSpotToBackend(spot, textarea.value); // 即時儲存筆記
+    });
 }
 
 
