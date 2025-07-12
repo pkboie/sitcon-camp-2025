@@ -1,5 +1,7 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoicGtib2llIiwiYSI6ImNtY3pqbDFuZDB6MDAybXF0eWplcXp0ajkifQ.gzOE8eUxEDY87RRJEExq2A';
 
+var cityLocaction = [121.5654, 25.0330]
+
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v12',
@@ -44,6 +46,7 @@ const cityCenters = {
 document.getElementById('citySelect').addEventListener('change', function () {
   const city = this.value;
   const center = cityCenters[city];
+  cityLocaction = center; // 更新全域變數 cityLocaction
   if (center) {
     map.flyTo({
       center: center,
@@ -75,29 +78,29 @@ const taipeiSpots = [
 ];
 
 // 新增 Marker
-taipeiSpots.forEach((spot) => {
-  const marker = new mapboxgl.Marker()
-    .setLngLat(spot.coord)
-    .addTo(map);
-    marker.getElement().style.cursor = 'pointer'; // 設定游標為 pointer
-    marker.getElement().style.backgroundColor = '#fff'; // 設定背景色
-    marker.getElement().style.padding = '5px'; // 設定內邊距
-    marker.getElement().style.borderRadius = '5px'; // 設定圓角
-    marker.getElement().style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'; // 設定陰影效果
-    marker.getElement().innerHTML = `<strong>${spot.name}</strong>`;
-    // 點擊 Marker 顯示景點資訊
-
-    marker.getElement().addEventListener('click', () => {
-      showSpotInfo(spot);
-    });
-    marker.getElement().addEventListener('mouseover', () => {
-        marker.getElement().style.backgroundColor = '#e0e0e0'; // 滑鼠移入變色
-        });
-    marker.getElement().addEventListener('mouseout', () => {
-        marker.getElement().style.backgroundColor = '#fff'; // 滑鼠移出變回原色
-    });
-    
-  });
+//taipeiSpots.forEach((spot) => {
+//  const marker = new mapboxgl.Marker()
+//    .setLngLat(spot.coord)
+//    .addTo(map);
+//    marker.getElement().style.cursor = 'pointer'; // 設定游標為 pointer
+//    marker.getElement().style.backgroundColor = '#fff'; // 設定背景色
+//    marker.getElement().style.padding = '5px'; // 設定內邊距
+//    marker.getElement().style.borderRadius = '5px'; // 設定圓角
+//    marker.getElement().style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'; // 設定陰影效果
+//    marker.getElement().innerHTML = `<strong>${spot.name}</strong>`;
+//    // 點擊 Marker 顯示景點資訊
+//
+//    marker.getElement().addEventListener('click', () => {
+//      showSpotInfo(spot);
+//    });
+//    marker.getElement().addEventListener('mouseover', () => {
+//        marker.getElement().style.backgroundColor = '#e0e0e0'; // 滑鼠移入變色
+//        });
+//    marker.getElement().addEventListener('mouseout', () => {
+//        marker.getElement().style.backgroundColor = '#fff'; // 滑鼠移出變回原色
+//    });
+//    
+//  });
 
 function showSpotInfo(spot) {
   const tempSpot = document.getElementById('temp-spot');
@@ -125,13 +128,13 @@ function showSpotInfo(spot) {
   tempNote.appendChild(img);
 
   // 官網連結
-  const linkP = document.createElement('p');
-  const link = document.createElement('a');
-  link.href = spot.url;
-  link.target = "_blank";
-  link.textContent = "官網";
-  linkP.appendChild(link);
-  tempNote.appendChild(linkP);
+  //const linkP = document.createElement('p');
+  //const link = document.createElement('a');
+  //link.href = spot.url;
+  //link.target = "_blank";
+  //link.textContent = "官網";
+  //linkP.appendChild(link);
+  //tempNote.appendChild(linkP);
 
   // 儲存到旅遊手冊按鈕
   const saveBtn = document.createElement('button');
@@ -152,8 +155,8 @@ function showSpotInfo(spot) {
 function addToHandbook(spot) {
   const handbook = document.getElementById('handbook');
 
-    const note = document.createElement('div');
-    note.className = 'card p-2';
+  const note = document.createElement('div');
+  note.className = 'card p-2';
 
   // 標題
   const title = document.createElement('h4');
@@ -168,15 +171,6 @@ function addToHandbook(spot) {
   img.style.display = 'block';
   note.appendChild(img);
 
-  // 官網連結
-  const linkP = document.createElement('p');
-  const link = document.createElement('a');
-  link.href = spot.url;
-  link.target = "_blank";
-  link.textContent = "官網";
-  linkP.appendChild(link);
-  note.appendChild(linkP);
-
   // 旅遊筆記 textarea
   const textarea = document.createElement('textarea');
   textarea.placeholder = "旅遊筆記...";
@@ -188,21 +182,38 @@ function addToHandbook(spot) {
   const delBtn = document.createElement('button');
   delBtn.textContent = "刪除";
   delBtn.style.marginTop = '5px';
+  delBtn.className = 'btn btn-danger btn-sm'; // Add Bootstrap class for styling
+
+  // Create and store the marker
+  const marker = new mapboxgl.Marker()
+    .setLngLat(spot.address) // Use spot.address for coordinates
+    .addTo(map);
+
+  // Add event listener to remove both the note and the marker
   delBtn.addEventListener('click', () => {
-    note.remove();
+    marker.remove(); // Remove the marker from the map
+    note.remove(); // Remove the handbook entry
+    // You might also want to remove the spot from the backend here if needed
+    // For example: deleteSpotFromBackend(spot.id);
   });
   note.appendChild(delBtn);
 
   handbook.appendChild(note);
 
-    saveBtn.addEventListener('click', () => {
-    addToHandbook(spot);
-    saveSpotToBackend(spot, ""); // 儲存時預設 note 空
-    });
-
-    textarea.addEventListener('change', () => {
+  textarea.addEventListener('change', () => {
     saveSpotToBackend(spot, textarea.value); // 即時儲存筆記
-    });
+  });
+
+  // Optional: Add marker styling and event listeners if desired
+  // marker.getElement().style.cursor = 'pointer';
+  // marker.getElement().style.backgroundColor = '#fff';
+  // marker.getElement().style.padding = '5px';
+  // marker.getElement().style.borderRadius = '5px';
+  // marker.getElement().style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+  // marker.getElement().innerHTML = `<strong>${spot.name}</strong>`;
+  // marker.getElement().addEventListener('click', () => { showSpotInfo(spot); });
+  // marker.getElement().addEventListener('mouseover', () => { marker.getElement().style.backgroundColor = '#e0e0e0'; });
+  // marker.getElement().addEventListener('mouseout', () => { marker.getElement().style.backgroundColor = '#fff'; });
 }
 
 // 呼叫後端儲存 API
@@ -224,15 +235,6 @@ function saveSpotToBackend(spot, noteText) {
     console.log("已儲存至後端", data);
   });
 }
-
-// 城市選擇移動地圖
-document.getElementById('citySelect').addEventListener('change', function () {
-  const city = this.value;
-  const center = cityCenters[city];
-  if (center) {
-    map.flyTo({ center, zoom: 10 });
-  }
-});
 
 // ====== PDF 生成，支援中文
 document.getElementById('generate-pdf').addEventListener('click', async () => {
@@ -309,3 +311,72 @@ async function toDataURL(url) {
       reader.readAsDataURL(blob);
     }));
 }
+document.querySelector('#search').addEventListener('click', () => {
+  console.log('Search button clicked');
+
+  $.ajax({
+    url: 'http://127.0.0.1:8000/search', // The URL to send the request to
+    method: 'GET', // Specify the HTTP method as GET
+    dataType: 'json', // Expected data type from the server (e.g., 'json', 'xml', 'html', 'text')
+    data: { // Optional: Data to send with the request (will be appended to the URL as query parameters)
+      "keyword": document.querySelector("#keyword").value,
+      "loc": [cityLocaction[1], cityLocaction[0]].join(',')
+    },
+    success: function(response) {
+      // This function is executed if the request is successful
+      console.log('Success:', response);
+      // Process the received data here
+      const tempSpot = document.getElementById('temp-spot');
+      tempSpot.innerHTML = ''; // Clear previous results
+
+      if (response && response.length > 0) {
+        response.forEach(spot => {
+          const spotElement = document.createElement('div');
+          spotElement.className = 'card p-2 mb-2'; // Use card class for styling
+
+          const title = document.createElement('h5'); // Use h5 for search results
+          title.textContent = spot.name;
+          spotElement.appendChild(title);
+
+          if (spot.photo) {
+            const img = document.createElement('img');
+            // Assuming the photo path is relative to the backend URL
+            img.src = `http://127.0.0.1:8000${spot.photo}`;
+            img.alt = spot.name;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.marginBottom = '10px';
+            spotElement.appendChild(img);
+          }
+
+          // Add button to add to handbook
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = '加入旅遊手冊';
+          saveBtn.className = 'btn btn-success btn-sm'; // Bootstrap button classes
+          saveBtn.addEventListener('click', () => {
+            // Create a spot object compatible with addToHandbook
+            const handbookSpot = {
+              name: spot.name,
+              img: spot.photo ? `http://127.0.0.1:8000${spot.photo}` : '', // Use full URL for handbook
+              url: spot.url || '', // Assuming url might be in the response or empty
+              address: spot.address
+            };
+            addToHandbook(handbookSpot);
+          });
+          spotElement.appendChild(saveBtn);
+
+          tempSpot.appendChild(spotElement);
+        });
+      } else {
+        tempSpot.innerHTML = '<p>找不到相關景點。</p>';
+      }
+    },
+    error: function(xhr, status, error) {
+      // This function is executed if the request fails
+      console.error('Error:', status, error);
+      const tempSpot = document.getElementById('temp-spot');
+      tempSpot.innerHTML = '<p>搜尋失敗，請稍後再試。</p>';
+    }
+  });
+})
