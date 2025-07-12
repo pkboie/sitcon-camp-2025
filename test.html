@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mapbox GL JS map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.13.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.13.0/mapbox-gl.js"></script>
+    <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+
+    <link
+    rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.2.0/mapbox-gl-directions.css"
+    type="text/css"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.2.0/mapbox-gl-directions.js"></script>
+
+</head>
+<body>
+<div id="map"></div>
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoicGtib2llIiwiYSI6ImNtYXdxd2ljMjBrbDYybW9zc2JwZGg3bDYifQ.IO-4KpCrTxc-uVF1wIA6mw';
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        center: [121.5171, 25.0478], // [lng, lat] for Taipei Main Station
+        zoom: 12
+    });
+
+    const directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: 'metric',
+        profile: 'mapbox/driving', // 可改 'mapbox/walking' 或 'mapbox/cycling'
+        controls: {
+            inputs: true,  // 顯示起點與終點輸入欄
+            instructions: true
+        }
+    });
+
+    map.addControl(directions, 'top-left');
+
+    // 若想預設起點與終點，可使用 setOrigin 和 setDestination
+    directions.setOrigin([121.5171, 25.0478]); // 台北車站
+    directions.setDestination([121.5645, 25.0330]); // 台北101
+
+    // 台北101
+    const marker1 = new mapboxgl.Marker()
+        .setLngLat([121.5645, 25.0330]) // [lng, lat]
+        .setPopup(new mapboxgl.Popup().setHTML("<h3>台北101</h3><p>台北知名地標</p>"))
+        .addTo(map);
+
+    // 國立故宮博物院
+    const marker2 = new mapboxgl.Marker()
+        .setLngLat([121.5485, 25.1024])
+        .setPopup(new mapboxgl.Popup().setHTML("<h3>故宮博物院</h3><p>世界級博物館</p>"))
+        .addTo(map);
+
+    map.on('load', () => {
+        map.addSource('route', {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'properties': {},
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [
+                        [121.5645, 25.0330], // 台北101
+                        [121.5485, 25.1024]  // 故宮博物院
+                    ]
+                }
+            }
+        });
+
+        map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': 'route',
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#888',
+                'line-width': 10
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>
