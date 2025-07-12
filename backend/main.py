@@ -34,6 +34,10 @@ class Spot(BaseModel):
     url: str
     note: str = ""
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the SITCON Camp API!"}
+
 @app.get("/spots/", response_model=List[Spot])
 def get_spots():
     c.execute("SELECT name, img, url, note FROM spots")

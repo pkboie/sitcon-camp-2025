@@ -171,3 +171,66 @@ function saveSpotToBackend(spot, noteText) {
     console.log("已儲存至後端", data);
   });
 }
+
+// 引入 Mapbox GL JS ai generate notes
+document.getElementById('generate-book').addEventListener('click', generatePDF);
+
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // 封面
+  doc.setFontSize(22);
+  doc.text("我的台北旅遊手冊", 20, 30);
+  doc.setFontSize(14);
+  doc.text("作者：你的名字", 20, 40);
+  doc.text("生成日期：" + new Date().toLocaleDateString(), 20, 50);
+
+  // 行程路線圖 (若有)
+  // 可將 Mapbox map 轉成 base64 image 輸出（較進階）
+  // doc.addImage(imgData, 'PNG', x, y, width, height);
+
+  let y = 70;
+
+  // 讀取旅遊手冊筆記
+  const notes = document.querySelectorAll('#handbook > div');
+  notes.forEach((note, index) => {
+    const title = note.querySelector('h4').textContent;
+    const img = note.querySelector('img');
+    const link = note.querySelector('a').href;
+    const text = note.querySelector('textarea').value;
+
+    doc.setFontSize(16);
+    doc.text(`${index + 1}. ${title}`, 20, y);
+    y += 10;
+
+    if (img) {
+      // 將 img 轉成 base64 image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const imgData = canvas.toDataURL('image/png');
+
+      doc.addImage(imgData, 'PNG', 20, y, 80, 60);
+      y += 65;
+    }
+
+    doc.setFontSize(12);
+    doc.text(`官網：${link}`, 20, y);
+    y += 7;
+
+    doc.text(`筆記：${text}`, 20, y);
+    y += 15;
+
+    // 換頁
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  // 下載 PDF
+  doc.save("旅遊手冊.pdf");
+}
