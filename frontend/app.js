@@ -12,7 +12,7 @@ const taipeiSpots = [
   {
     name: "台北車站",
     coord: [121.5170, 25.0478],
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Taipei_Station_2018.jpg/320px-Taipei_Station_2018.jpg",
+    img: "https://oneforty.s3.ap-northeast-3.amazonaws.com/s3/quill/20220221-5gyB6RuRHaxbg6CT61VsIK9IjzSlWzB0UTVGTSwH.jpg",
     url: "https://www.railway.gov.tw/tra-tip-web/tip"
   },
   {
