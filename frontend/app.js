@@ -207,3 +207,77 @@ function saveSpotToBackend(spot, noteText) {
     console.log("已儲存至後端", data);
   });
 }
+
+document.getElementById('generate-pdf').addEventListener('click', async () => {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  const handbook = document.getElementById('handbook');
+  const entries = handbook.querySelectorAll('.card');
+
+  if (entries.length === 0) {
+    alert('旅遊手冊尚未加入任何景點！');
+    return;
+  }
+
+  let y = 20; // 初始 Y 座標
+
+  for (const entry of entries) {
+    const title = entry.querySelector('h4')?.textContent || '';
+    const imgEl = entry.querySelector('img');
+    const url = entry.querySelector('a')?.href || '';
+    const note = entry.querySelector('textarea')?.value || '';
+
+    // 標題
+    pdf.setFontSize(14);
+    pdf.text(title, 10, y);
+    y += 8;
+
+    // 圖片（如存在）
+    if (imgEl && imgEl.src) {
+      try {
+        const imgData = await toDataURL(imgEl.src);
+        pdf.addImage(imgData, 'JPEG', 10, y, 60, 40);
+        y += 45;
+      } catch (e) {
+        pdf.setFontSize(10);
+        pdf.text('(圖片載入失敗)', 10, y);
+        y += 10;
+      }
+    }
+
+    // 官網
+    if (url) {
+      pdf.setFontSize(10);
+      pdf.text(`官網：${url}`, 10, y);
+      y += 7;
+    }
+
+    // 筆記
+    if (note) {
+      const lines = pdf.splitTextToSize(`筆記：${note}`, 180);
+      pdf.text(lines, 10, y);
+      y += lines.length * 6;
+    }
+
+    y += 10;
+
+    if (y > 260) {
+      pdf.addPage();
+      y = 20;
+    }
+  }
+
+  pdf.save('旅遊小冊.pdf');
+});
+
+// 將圖片網址轉為 base64（給 jsPDF 使用）
+function toDataURL(url) {
+  return fetch(url)
+    .then(res => res.blob())
+    .then(blob => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    }));
+}
+
