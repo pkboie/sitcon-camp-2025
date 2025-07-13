@@ -236,9 +236,13 @@ function saveSpotToBackend(spot, noteText) {
   });
 }
 
+// ====== 引入 jsPDF 與字體
+// import { jsPDF } from "jspdf";
+// import "./NotoSansCJKsc-normal.js"; // 確保字體檔已經 import
+
 // ====== PDF 生成，支援中文
 document.getElementById('generate-pdf').addEventListener('click', async () => {
-  const pdf = new window.jspdf.jsPDF();
+   const pdf = new window.jspdf.jsPDF();
   pdf.setFont("NotoSansCJKsc"); // ⭐️ 使用中文字型
 
   const handbook = document.getElementById('handbook');
@@ -311,6 +315,7 @@ async function toDataURL(url) {
       reader.readAsDataURL(blob);
     }));
 }
+
 
 document.querySelector('#search').addEventListener('click', () => {
   console.log('Search button clicked');
