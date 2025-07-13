@@ -236,35 +236,30 @@ function saveSpotToBackend(spot, noteText) {
   });
 }
 
-// ====== 引入 jsPDF 與字體
-// import { jsPDF } from "jspdf";
-// import "./NotoSansCJKsc-normal.js"; // 確保字體檔已經 import
-
-// ====== PDF 生成，支援中文
+// ====== PDF Generation with English UI
 document.getElementById('generate-pdf').addEventListener('click', async () => {
-   const pdf = new window.jspdf.jsPDF();
-  pdf.setFont("NotoSansCJKsc"); // ⭐️ 使用中文字型
+  const pdf = new window.jspdf.jsPDF();
 
   const handbook = document.getElementById('handbook');
   const entries = handbook.querySelectorAll('.card');
 
   if (entries.length === 0) {
-    alert('旅遊手冊尚未加入任何景點！');
+    alert('Your travel handbook does not contain any places yet!');
     return;
   }
 
   pdf.setFontSize(24);
   pdf.setTextColor(40, 40, 90);
-  pdf.text("我的旅遊小冊", 105, 80, { align: 'center' });
+  pdf.text("My Travel Handbook", 105, 80, { align: 'center' });
 
   pdf.setFontSize(14);
   pdf.setTextColor(80);
-  pdf.text("探索旅程・書寫回憶", 105, 95, { align: 'center' });
+  pdf.text("Explore journeys  Write your memories", 105, 95, { align: 'center' });
 
   const today = new Date().toLocaleDateString();
   pdf.setFontSize(10);
   pdf.setTextColor(100);
-  pdf.text(`製作日期：${today}`, 105, 110, { align: 'center' });
+  pdf.text(`Created on: ${today}`, 105, 110, { align: 'center' });
 
   pdf.addPage();
 
@@ -284,28 +279,28 @@ document.getElementById('generate-pdf').addEventListener('click', async () => {
         pdf.addImage(imgData, 'JPEG', 40, 40, 130, 80);
       } catch (e) {
         pdf.setFontSize(10);
-        pdf.text('(圖片載入失敗)', 20, 50);
+        pdf.text('(Image failed to load)', 20, 50);
       }
     }
 
     pdf.setFontSize(11);
     pdf.setTextColor(0, 102, 204);
-    pdf.textWithLink("官方網站", 20, 130, { url });
+    pdf.textWithLink("Official Website", 20, 130, { url });
 
     if (note) {
       pdf.setFontSize(12);
       pdf.setTextColor(50);
-      const noteLines = pdf.splitTextToSize(`筆記：${note}`, 170);
+      const noteLines = pdf.splitTextToSize(`Note: ${note}`, 170);
       pdf.text(noteLines, 20, 145);
     }
 
     pdf.addPage();
   }
 
-  pdf.save("旅遊小冊.pdf");
+  pdf.save("Travel_Handbook.pdf");
 });
 
-// ====== 工具函數：圖片轉 base64
+// ====== Helper function: Convert image to base64
 async function toDataURL(url) {
   return fetch(url)
     .then(res => res.blob())
@@ -315,7 +310,6 @@ async function toDataURL(url) {
       reader.readAsDataURL(blob);
     }));
 }
-
 
 document.querySelector('#search').addEventListener('click', () => {
   console.log('Search button clicked');
