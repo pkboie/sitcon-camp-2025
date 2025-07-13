@@ -1,0 +1,3 @@
+[submodule "mapSearch"]
+	path = mapSearch
+	url = https://github.com/duckducktw/mapSearch.git
