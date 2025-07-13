@@ -10,7 +10,7 @@ const map = new mapboxgl.Map({
 });
 
 window.onload = () => {
-  fetch('http://127.0.0.1:8000/spots/')
+  fetch('http://sitcon-backend.gdtw.qzz.io/spots/')
     .then(res => res.json())
     .then(data => {
       data.forEach(spot => {
@@ -218,7 +218,7 @@ function addToHandbook(spot) {
 
 // 呼叫後端儲存 API
 function saveSpotToBackend(spot, noteText) {
-  fetch('http://127.0.0.1:8000/spots/', {
+  fetch('http://sitcon-backend.gdtw.qzz.io/spots/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -311,11 +311,12 @@ async function toDataURL(url) {
       reader.readAsDataURL(blob);
     }));
 }
+
 document.querySelector('#search').addEventListener('click', () => {
   console.log('Search button clicked');
 
   $.ajax({
-    url: 'http://127.0.0.1:8000/search', // The URL to send the request to
+    url: 'http://sitcon-backend.gdtw.qzz.io/search', // The URL to send the request to
     method: 'GET', // Specify the HTTP method as GET
     dataType: 'json', // Expected data type from the server (e.g., 'json', 'xml', 'html', 'text')
     data: { // Optional: Data to send with the request (will be appended to the URL as query parameters)
@@ -341,7 +342,7 @@ document.querySelector('#search').addEventListener('click', () => {
           if (spot.photo) {
             const img = document.createElement('img');
             // Assuming the photo path is relative to the backend URL
-            img.src = `http://127.0.0.1:8000${spot.photo}`;
+            img.src = `http://sitcon-backend.gdtw.qzz.io${spot.photo}`;
             img.alt = spot.name;
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
@@ -358,7 +359,7 @@ document.querySelector('#search').addEventListener('click', () => {
             // Create a spot object compatible with addToHandbook
             const handbookSpot = {
               name: spot.name,
-              img: spot.photo ? `http://127.0.0.1:8000${spot.photo}` : '', // Use full URL for handbook
+              img: spot.photo ? `http://sitcon-backend.gdtw.qzz.io${spot.photo}` : '', // Use full URL for handbook
               url: spot.url || '', // Assuming url might be in the response or empty
               address: spot.address
             };
