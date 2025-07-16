@@ -10,7 +10,7 @@ const map = new mapboxgl.Map({
 });
 
 window.onload = () => {
-  fetch('http://sitcon-backend.gdtw.qzz.io/spots/')
+  fetch('https://sitcon-camp-2025-603105194871.asia-east1.run.app/spots/')
     .then(res => res.json())
     .then(data => {
       data.forEach(spot => {
@@ -218,7 +218,7 @@ function addToHandbook(spot) {
 
 // 呼叫後端儲存 API
 function saveSpotToBackend(spot, noteText) {
-  fetch('http://sitcon-backend.gdtw.qzz.io/spots/', {
+  fetch('https://sitcon-camp-2025-603105194871.asia-east1.run.app/spots/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -315,7 +315,7 @@ document.querySelector('#search').addEventListener('click', () => {
   console.log('Search button clicked');
 
   $.ajax({
-    url: 'http://sitcon-backend.gdtw.qzz.io/search', // The URL to send the request to
+    url: 'https://sitcon-camp-2025-603105194871.asia-east1.run.app/search', // The URL to send the request to
     method: 'GET', // Specify the HTTP method as GET
     dataType: 'json', // Expected data type from the server (e.g., 'json', 'xml', 'html', 'text')
     data: { // Optional: Data to send with the request (will be appended to the URL as query parameters)
@@ -341,7 +341,7 @@ document.querySelector('#search').addEventListener('click', () => {
           if (spot.photo) {
             const img = document.createElement('img');
             // Assuming the photo path is relative to the backend URL
-            img.src = `http://sitcon-backend.gdtw.qzz.io${spot.photo}`;
+            img.src = `https://sitcon-camp-2025-603105194871.asia-east1.run.app${spot.photo}`;
             img.alt = spot.name;
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
@@ -358,7 +358,7 @@ document.querySelector('#search').addEventListener('click', () => {
             // Create a spot object compatible with addToHandbook
             const handbookSpot = {
               name: spot.name,
-              img: spot.photo ? `http://sitcon-backend.gdtw.qzz.io${spot.photo}` : '', // Use full URL for handbook
+              img: spot.photo ? `https://sitcon-camp-2025-603105194871.asia-east1.run.app${spot.photo}` : '', // Use full URL for handbook
               url: spot.url || '', // Assuming url might be in the response or empty
               address: spot.address
             };
